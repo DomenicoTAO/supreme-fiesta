@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Response
 from pydantic import BaseModel
 from typing import List
 import requests
@@ -6,7 +6,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import io
-from fastapi.responses import Response
 
 app = FastAPI()
 
@@ -16,12 +15,13 @@ class PrintRequest(BaseModel):
 @app.post("/generate-pdf")
 async def generate_pdf(request: PrintRequest):
     pdf_buffer = io.BytesIO()
+    # A4 è 595x842 punti
     c = canvas.Canvas(pdf_buffer, pagesize=A4)
-    w, h = A4
     
-    # 3x3 griglia
-    cell_w = w / 3
-    cell_h = h / 3
+    # Dimensioni carta (es. 63mm x 88mm = 178pt x 250pt circa)
+    # Regola questi valori se le tue carte hanno dimensioni diverse
+    card_w = 178 
+    card_h = 250
     
     for i, url in enumerate(request.image_urls):
         if i >= 9: break
@@ -29,14 +29,17 @@ async def generate_pdf(request: PrintRequest):
             response = requests.get(url, timeout=5)
             img = ImageReader(io.BytesIO(response.content))
             
-            # Posizionamento (senza margini per attaccare le immagini)
+            # Calcolo posizione: griglia 3x3
             col = i % 3
             row = 2 - (i // 3)
-            x = col * cell_w
-            y = row * cell_h
             
-            c.drawImage(img, x, y, width=cell_w, height=cell_h)
-        except Exception as e:
+            # x, y partono dal basso a sinistra
+            # Puoi cambiare 30, 50 per spostare l'intero blocco di carte
+            x = 30 + (col * card_w)
+            y = 50 + (row * card_h)
+            
+            c.drawImage(img, x, y, width=card_w, height=card_h)
+        except Exception:
             continue
 
     c.showPage()
