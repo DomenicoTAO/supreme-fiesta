@@ -29,13 +29,13 @@ async def generate_pdf(request: PrintRequest):
             response = requests.get(url, timeout=5)
             img = ImageReader(io.BytesIO(response.content))
             
-            # Posizionamento (partendo dall'alto a sinistra)
+            # Posizionamento (senza margini per attaccare le immagini)
             col = i % 3
             row = 2 - (i // 3)
-            x = col * cell_w + 10
-            y = row * cell_h + 10
+            x = col * cell_w
+            y = row * cell_h
             
-            c.drawImage(img, x, y, width=cell_w-20, height=cell_h-20)
+            c.drawImage(img, x, y, width=cell_w, height=cell_h)
         except Exception as e:
             continue
 
