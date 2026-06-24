@@ -23,8 +23,8 @@ async def generate_pdf(request: PrintRequest):
     
     # Dimensioni carta (es. 63mm x 88mm = 178pt x 250pt circa)
     # Regola questi valori se le tue carte hanno dimensioni diverse
-    card_w = 595.27 / 3
-    card_h = 841.89 / 3
+    card_w = 178
+    card_h = 250
     
     # Calcolo per centrare la griglia 3x3
     grid_w = card_w * 3
