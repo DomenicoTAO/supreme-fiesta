@@ -33,14 +33,18 @@ async def generate_pdf(request: PrintRequest):
     offset_y = (page_h - grid_h) / 2
     
     for i, url in enumerate(request.image_urls):
-        if i >= 9: break
+        # Ogni 9 immagini, se non è la prima, aggiungiamo una nuova pagina
+        if i > 0 and i % 9 == 0:
+            c.showPage()
+
         try:
             response = requests.get(url, timeout=5)
             img = ImageReader(io.BytesIO(response.content))
             
-            # Calcolo posizione: griglia 3x3
-            col = i % 3
-            row = 2 - (i // 3)
+            # Calcolo posizione all'interno della pagina corrente (modulo 9)
+            pos_in_page = i % 9
+            col = pos_in_page % 3
+            row = 2 - (pos_in_page // 3)
             
             # x, y partono dal basso a sinistra
             # Puoi cambiare 30, 50 per spostare l'intero blocco di carte
