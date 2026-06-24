@@ -17,6 +17,9 @@ async def generate_pdf(request: PrintRequest):
     pdf_buffer = io.BytesIO()
     # A4 è 595x842 punti
     c = canvas.Canvas(pdf_buffer, pagesize=A4)
+
+    # Larghezza e altezza totale A4
+    page_w, page_h = A4
     
     # Dimensioni carta (es. 63mm x 88mm = 178pt x 250pt circa)
     # Regola questi valori se le tue carte hanno dimensioni diverse
