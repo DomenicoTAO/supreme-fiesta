@@ -20,8 +20,14 @@ async def generate_pdf(request: PrintRequest):
     
     # Dimensioni carta (es. 63mm x 88mm = 178pt x 250pt circa)
     # Regola questi valori se le tue carte hanno dimensioni diverse
-    card_w = 178 
-    card_h = 250
+    card_w = 595.27 / 3
+    card_h = 841.89 / 3
+    
+    # Calcolo per centrare la griglia 3x3
+    grid_w = card_w * 3
+    grid_h = card_h * 3    
+    offset_x = (page_w - grid_w) / 2
+    offset_y = (page_h - grid_h) / 2
     
     for i, url in enumerate(request.image_urls):
         if i >= 9: break
@@ -35,8 +41,8 @@ async def generate_pdf(request: PrintRequest):
             
             # x, y partono dal basso a sinistra
             # Puoi cambiare 30, 50 per spostare l'intero blocco di carte
-            x = 30 + (col * card_w)
-            y = 50 + (row * card_h)
+            x = offset_x + (col * card_w)
+            y = offset_y + (row * card_h)
             
             c.drawImage(img, x, y, width=card_w, height=card_h)
         except Exception:
