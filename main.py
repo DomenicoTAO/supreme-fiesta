@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, HTTPException
 from pydantic import BaseModel
 import json
 import os
@@ -113,7 +113,8 @@ async def save_list(item: Dict):
     # Controllo se il nome è già presente nel dizionario (data)
     if name in data:
         print(f"DEBUG: ERRORE - Il nome {name} esiste già.")
-        return {"status": "error", "message": "Il nome della lista esiste già!"}, 400
+        # Questo forza il server a rispondere 400 Bad Request
+        raise HTTPException(status_code=400, detail="Il nome della lista esiste già!")
 
     # Se non esiste, procediamo al salvataggio
     data[name] = {
