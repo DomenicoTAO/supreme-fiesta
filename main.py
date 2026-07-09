@@ -8,7 +8,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import io
+import base64
 
+# Recupera il token in sicurezza senza scriverlo nel codice
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+REPO_NAME = "DomenicoTAO/supreme-fiesta"
 DATA_FILE = "data.json"
 
 app = FastAPI()
@@ -66,21 +70,35 @@ async def generate_pdf(request: PrintRequest):
 
 # Funzione helper per caricare/salvare
 def load_data():
-    # Se il file non esiste, lo crea vuoto e restituisce un dizionario vuoto
-    if not os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "w") as f:
-            json.dump({}, f)
-        return {}
-    # Se esiste, lo legge normalmente
-    with open(DATA_FILE, "r") as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            # Gestisce il caso in cui il file esiste ma è corrotto/vuoto
-            return {}
+    url = f"https://api.github.com/repos/{REPO_NAME}/contents/{DATA_FILE}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        content = response.json().get("content")
+        return json.loads(base64.b64decode(content).decode())
+    return {}
 
 def save_data(data):
-    with open(DATA_FILE, "w") as f: json.dump(data, f)
+    url = f"https://api.github.com/repos/{REPO_NAME}/contents/{DATA_FILE}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+
+    # Tentiamo di recuperare lo SHA del file esistente
+    response = requests.get(url, headers=headers)
+    sha = response.json().get("sha") if response.status_code == 200 else None
+
+    content = json.dumps(data, indent=4)
+    content_encoded = base64.b64encode(content.encode()).decode()
+
+    payload = {
+        "message": "Aggiornamento data.json automatico",
+        "content": content_encoded
+    }
+
+    # Se avevamo uno SHA, lo aggiungiamo al payload per sovrascrivere
+    if sha:
+        payload["sha"] = sha
+
+    requests.put(url, headers=headers, json=payload)
 
 @app.post("/save-list")
 async def save_list(item: Dict):
