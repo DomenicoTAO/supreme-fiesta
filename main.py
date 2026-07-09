@@ -124,7 +124,7 @@ async def save_list(item: Dict):
     }
     save_data(data)
     print(f"DEBUG: Salvataggio effettuato con successo per: {name}")
-    return {"status": "success"}
+    return {"detail": "Lista salvata con successo"}
 
 @app.get("/list-names")
 async def list_names():
