@@ -87,9 +87,16 @@ async def save_list(item: Dict):
     # item conterrà: {"name": "...", "color": "...", "vcm": "...", "urls": [...]}
     data = load_data()
     name = item.get("name")
+
+    # Questo print apparirà nei log di Render
+    print(f"DEBUG: Ricevuta richiesta di salvataggio per la lista: {name}")
+    print(f"DEBUG: Contenuto ricevuto: {item}")
+
     # Controllo se il nome è già presente nel dizionario (data)
     if name in data:
+        print(f"DEBUG: ERRORE - Il nome {name} esiste già.")
         return {"status": "error", "message": "Il nome della lista esiste già!"}, 400
+
     # Se non esiste, procediamo al salvataggio
     data[name] = {
         "color": item.get("color"),
@@ -97,6 +104,7 @@ async def save_list(item: Dict):
         "urls": item.get("urls")
     }
     save_data(data)
+    print(f"DEBUG: Salvataggio effettuato con successo per: {name}")
     return {"status": "success"}
 
 @app.get("/list-names")
@@ -113,3 +121,7 @@ async def get_list(name: str):
         return data[name]  # Restituisce il dizionario {"type": "...", "urls": [...]}
     else:
         return {"error": "Lista non trovata"}, 404
+
+@app.get("/test-data")
+async def test_data():
+    return load_data()
