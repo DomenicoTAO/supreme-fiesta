@@ -102,7 +102,7 @@ def save_data(data):
 
 @app.post("/save-list")
 async def save_list(item: Dict):
-    # item conterrà: {"name": "...", "color": "...", "vcm": "...", "urls": [...]}
+    # item conterrà: {"name": "...", "color": "...", "vcm": "...", "urls": [...], "imgs": [...]}
     data = load_data()
     name = item.get("name")
 
@@ -120,7 +120,8 @@ async def save_list(item: Dict):
     data[name] = {
         "color": item.get("color"),
         "vcm": item.get("vcm"),
-        "urls": item.get("urls")
+        "urls": item.get("urls"),
+        "imgs": item.get("imgs")
     }
     save_data(data)
     print(f"DEBUG: Salvataggio effettuato con successo per: {name}")
