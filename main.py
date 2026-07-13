@@ -131,7 +131,8 @@ async def save_list(item: Dict):
 async def list_names():
     data = load_data()
     # Restituiamo una lista di oggetti con nome e tipo
-    return [{"name": k, "color": v["color"], "vcm": v["vcm"]} for k, v in data.items()]
+    raw_list = [{"name": k, "color": v["color"], "vcm": v["vcm"]} for k, v in data.items()]
+    return sorted(raw_list, key=lambda x: x['color'])
 
 @app.get("/get-list")
 async def get_list(name: str):
@@ -142,6 +143,14 @@ async def get_list(name: str):
     else:
         return {"error": "Lista non trovata"}, 404
 
-@app.get("/test-data")
-async def test_data():
-    return load_data()
+@app.delete("/delete-list/{name}")
+async def delete_list(name: str):
+    data = load_data()
+    if name in data:
+        del data[name]
+        save_data(data)
+        print(f"DEBUG: Eliminata lista: {name}")
+        return {"detail": f"Lista '{name}' eliminata con successo"}
+    else:
+        print(f"DEBUG: ERRORE - Tentativo di eliminare lista inesistente: {name}")
+        raise HTTPException(status_code=404, detail="Lista non trovata")
